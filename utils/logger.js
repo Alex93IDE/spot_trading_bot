@@ -5,7 +5,6 @@ const colors = {
 }
 
 const logColor = (color, content) => {
-    console.log(color);
     console.log(color, content)
 }
 
