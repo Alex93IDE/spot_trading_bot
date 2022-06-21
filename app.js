@@ -114,9 +114,9 @@ async function _buy_kucoin(price) {
 
                 orders.push(order)
 
-                logColor(colors.green, '=============================')
-                logColor(colors.green, `Bought ${bot_struct.base_quote / price} ${bot_struct.MARKET1} for ${parseFloat(bot_struct.base_quote).toFixed(2)} ${bot_struct.MARKET2}, Price: ${order.buy_price}\n`)
-                logColor(colors.green, '=============================')
+                log('================================================================')
+                log(`Bought ${bot_struct.base_quote / price} ${bot_struct.MARKET1} for ${parseFloat(bot_struct.base_quote).toFixed(2)} ${bot_struct.MARKET2}, Price: ${order.buy_price}\n`)
+                log('================================================================')
 
                 await _calculateProfits()
             }
@@ -186,10 +186,9 @@ async function _sell_kucoin(price) {
                     store.put(`${bot_struct.MARKET1}_balance`, await getBalance(bot_struct.MARKET1));
                     store.put(`${bot_struct.MARKET2}_balance`, await getBalance(bot_struct.MARKET2));
 
-                    logColor(colors.red, '=============================')
-                    logColor(colors.red,
-                        `Sold ${totalAmount} ${bot_struct.MARKET1} for ${parseFloat(totalAmount * _price).toFixed(2)} ${bot_struct.MARKET2}, Price: ${_price}\n`)
-                    logColor(colors.red, '=============================')
+                    log('===========================================================')
+                    log(`Sold ${totalAmount} ${bot_struct.MARKET1} for ${parseFloat(totalAmount * _price).toFixed(2)} ${bot_struct.MARKET2}, Price: ${_price}\n`)
+                    log('===========================================================')
 
                     await _calculateProfits()
                     var i = orders.length

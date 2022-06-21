@@ -5,8 +5,10 @@ const { log, logColor, colors } = require('../../utils/logger')
 exports.home = function home(req, res) {
     let store = new Storage(`./data/${bot_struct.MARKET}.json`)
     let system = (bot_struct.start_bot_trading) ? 'ENCENDIDO' : 'DETENIDO'
+    let price = (bot_struct.start_bot_trading) ? await getPriceMarket(bot_struct.MARKET) : 0
     res.json({
         system: system,
+        marketPrice: price,
         store: store.store
     })
 }
@@ -23,7 +25,7 @@ exports.process_bot = async function a(req, res) {
     const words = data.symbol.split('-')
     let symbol_1 = words[0].toUpperCase()
     let symbol_2 = words[1].toUpperCase()
-    
+
     switch (data.status) {
         case 'start':
             bot_struct.MARKET1 = symbol_1
