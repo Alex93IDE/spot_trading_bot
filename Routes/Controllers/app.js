@@ -9,3 +9,10 @@ exports.home = function home(req, res) {
         store: store.store
     })
 }
+
+exports.restart = function restart(req, res) {
+    setTimeout(() => {
+        process.exit()
+    }, 1000);
+    res.json("done")
+}
