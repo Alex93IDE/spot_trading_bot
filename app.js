@@ -218,33 +218,28 @@ async function loop() {
                     //console.clear()
                     //log('=====================================================================')
                     //_logProfits(market_price)
-                   // log('=====================================================================')
+                    //log('=====================================================================')
 
                     //log(`Prev price: ${start_price}`)
                     //log(`New price: ${market_price}`)
-
                     if (market_price < start_price) {
                         const factor = (start_price - market_price)
                         const percent = parseFloat(100 * factor / start_price).toFixed(2)
-
-                        logColor(colors.red, `Losers: -${parseFloat(percent).toFixed(3)}% ==> -$${parseFloat(factor).toFixed(4)}`)
+                        //logColor(colors.red, `Losers: -${parseFloat(percent).toFixed(3)}% ==> -$${parseFloat(factor).toFixed(4)}`)
                         store.put('percent', `-${parseFloat(percent).toFixed(3)}`)
-
                         if (percent >= process.env.PRICE_PERCENT)
                             await _buy_kucoin(market_price);
 
                     } else {
                         const factor = (market_price - start_price)
                         const percent = 100 * factor / market_price
-
-                        logColor(colors.green, `Gainers: +${parseFloat(percent).toFixed(3)}% ==> +$${parseFloat(factor).toFixed(4)}`)
+                        //logColor(colors.green, `Gainers: +${parseFloat(percent).toFixed(3)}% ==> +$${parseFloat(factor).toFixed(4)}`)
                         store.put('percent', `+${parseFloat(percent).toFixed(3)}`)
-
                         await _sell_kucoin(market_price)
                     }
                     const orders = store.get('orders')
                     //if (orders.length > 0)
-                        //console.log(orders[orders.length - 1])
+                    //console.log(orders[orders.length - 1])
                 }
             }
         } catch (error) {
