@@ -90,10 +90,14 @@ async function _buy_kucoin(price) {
             let idFillorder = ''
             let res_fill
             while (res.data.orderId != idFillorder) {
-                res_fill = await getFillsId(bot_struct.MARKET, 'buy', res.data.orderId)
-                if (res_fill.data.items[0] != null)
-                    idFillorder = res_fill.data.items[0].orderId
-                sleep(3000)
+                try {
+                    res_fill = await getFillsId(bot_struct.MARKET, 'buy', res.data.orderId)
+                    if (res_fill.data.items[0] != null)
+                        idFillorder = res_fill.data.items[0].orderId
+                    sleep(3000)
+                } catch (error) {
+                    logColor(colors.red, error)
+                }
             }
             order.id = res.data.orderId
             if (res_fill.code == "200000") {
@@ -155,10 +159,14 @@ async function _sell_kucoin(price) {
                 let idFillorder = ''
                 let res_fill
                 while (res.data.orderId != idFillorder) {
-                    res_fill = await getFillsId(bot_struct.MARKET, 'sell', res.data.orderId)
-                    if (res_fill.data.items[0] != null)
-                        idFillorder = res_fill.data.items[0].orderId
-                    sleep(3000)
+                    try {
+                        res_fill = await getFillsId(bot_struct.MARKET, 'sell', res.data.orderId)
+                        if (res_fill.data.items[0] != null)
+                            idFillorder = res_fill.data.items[0].orderId
+                        sleep(3000)
+                    } catch (error) {
+                        logColor(colors.red, error)
+                    }
                 }
                 if (res_fill.code == "200000") {
                     const _price = parseFloat(res_fill.data.items[0].price)
