@@ -61,7 +61,7 @@ function _logProfits(price) {
 async function _buy_kucoin(price) {
     if (store.get(`${bot_struct.MARKET2}_balance`) > bot_struct.base_quote) {
         var orders = store.get('orders')
-        var factor = process.env.PRICE_PERCENT * price / 100
+        var factor = 0;
         var order = {
             id: '',
             buy_price: 0,
@@ -91,11 +91,14 @@ async function _buy_kucoin(price) {
             let res_fill
             while (res.data.orderId != idFillorder) {
                 res_fill = await getFillsId(bot_struct.MARKET, 'buy', res.data.orderId)
-                idFillorder = res_fill.data.items[0].orderId
-                sleep(1000)
+                if (res_fill.data.items[0] != null)
+                    idFillorder = res_fill.data.items[0].orderId
+                sleep(3000)
             }
             order.id = res.data.orderId
             if (res_fill.code == "200000") {
+                factor = process.env.PRICE_PERCENT * res_fill.data.items[0].price / 100
+
                 order.status = 'bought'
                 order.buy_price = parseFloat(res_fill.data.items[0].price)
                 order.amount = parseFloat(res_fill.data.items[0].size)
@@ -108,14 +111,13 @@ async function _buy_kucoin(price) {
                 orders.push(order)
 
                 logColor(colors.green, '=============================')
-                logColor(colors.green, `Bought ${bot_struct.base_quote} ${bot_struct.MARKET1} for ${parseFloat(bot_struct.base_quote / price).toFixed(2)} ${bot_struct.MARKET2}, Price: ${order.buy_price}\n`)
+                logColor(colors.green, `Bought ${bot_struct.base_quote / price} ${bot_struct.MARKET1} for ${parseFloat(bot_struct.base_quote).toFixed(2)} ${bot_struct.MARKET2}, Price: ${order.buy_price}\n`)
                 logColor(colors.green, '=============================')
 
                 await _calculateProfits()
             }
-        } else _newPriceReset(2, bot_struct.base_quote / price, price)
-    } else _newPriceReset(2, bot_struct.base_quote / price, price)
-
+        } else _newPriceReset(2, bot_struct.base_quote, price)
+    } else _newPriceReset(2, bot_struct.base_quote, price)
 }
 
 async function _sell_kucoin(price) {
@@ -150,12 +152,13 @@ async function _sell_kucoin(price) {
                 tradeType: 'TRADE'
             }, { size: amountToSell })
             if (res.code == "200000") {
+                let idFillorder = ''
                 let res_fill
-                let idFillOrder = ''
-                while (res.data.orderId != idFillOrder) {
+                while (res.data.orderId != idFillorder) {
                     res_fill = await getFillsId(bot_struct.MARKET, 'sell', res.data.orderId)
-                    idFillOrder = res.data.items[0].orderId
-                    sleep(1000)
+                    if (res_fill.data.items[0] != null)
+                        idFillorder = res_fill.data.items[0].orderId
+                    sleep(3000)
                 }
                 if (res_fill.code == "200000") {
                     const _price = parseFloat(res_fill.data.items[0].price)
