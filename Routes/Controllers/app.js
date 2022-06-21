@@ -2,7 +2,7 @@ const Storage = require('node-storage')
 const { bot_struct, getPriceMarket, getBalance } = require('../../utils/bot')
 const { log, logColor, colors } = require('../../utils/logger')
 
-exports.home = function home(req, res) {
+exports.home = async function home(req, res) {
     let store = new Storage(`./data/${bot_struct.MARKET}.json`)
     let system = (bot_struct.start_bot_trading) ? 'ENCENDIDO' : 'DETENIDO'
     let price = (bot_struct.start_bot_trading) ? await getPriceMarket(bot_struct.MARKET) : 0
