@@ -2,7 +2,6 @@ require('dotenv').config()
 const express = require('express')
 const { log, logColor, colors } = require('./utils/logger')
 const { bot_struct, getBalance, getPriceMarket, _buy, getFillsId, _sell, getBaseSize } = require('./utils/bot')
-const my_process = require('./utils/process')
 const Storage = require('node-storage')
 const server = express();
 const port = 8080;
@@ -38,24 +37,6 @@ async function _calculateProfits() {
             parseFloat(prev) + parseFloat(next)) : 0
 
     store.put('profits', totalSoldProfits + parseFloat(store.get('profits')))
-}
-
-function _logProfits(price) {
-    const profits = parseFloat(store.get('profits'))
-    var isGainerProfit = profits > 0 ?
-        1 : profits < 0 ? 2 : 0
-
-    logColor(isGainerProfit == 1 ?
-        colors.green : isGainerProfit == 2 ?
-            colors.red : colors.gray,
-        `Global Profits: ${parseFloat(store.get('profits')).toFixed(3)} ${bot_struct.MARKET2}`)
-
-    const m1Balance = store.get(`${bot_struct.MARKET1}_balance`)
-    const m2Balance = store.get(`${bot_struct.MARKET2}_balance`)
-
-    const initialBalance = store.get(`initial_${bot_struct.MARKET2}_balance`)
-    logColor(colors.gray,
-        `Balance: ${m1Balance} ${bot_struct.MARKET1}, ${m2Balance.toFixed(2)} ${bot_struct.MARKET2}, Current: ${parseFloat(m1Balance * price + m2Balance)} ${bot_struct.MARKET2}, Initial: ${initialBalance.toFixed(2)} ${bot_struct.MARKET2}`)
 }
 
 async function _buy_kucoin(price) {
@@ -94,7 +75,7 @@ async function _buy_kucoin(price) {
                     res_fill = await getFillsId(bot_struct.MARKET, 'buy', res.data.orderId)
                     if (res_fill.data.items[0] != null)
                         idFillorder = res_fill.data.items[0].orderId
-                    sleep(3000)
+                    sleep(5000)
                 } catch (error) {
                     logColor(colors.red, error)
                 }
@@ -163,7 +144,7 @@ async function _sell_kucoin(price) {
                         res_fill = await getFillsId(bot_struct.MARKET, 'sell', res.data.orderId)
                         if (res_fill.data.items[0] != null)
                             idFillorder = res_fill.data.items[0].orderId
-                        sleep(3000)
+                        sleep(5000)
                     } catch (error) {
                         logColor(colors.red, error)
                     }
@@ -181,7 +162,6 @@ async function _sell_kucoin(price) {
                             }
                         }
                     }
-
                     store.put('start_price', _price)
                     store.put(`${bot_struct.MARKET1}_balance`, await getBalance(bot_struct.MARKET1));
                     store.put(`${bot_struct.MARKET2}_balance`, await getBalance(bot_struct.MARKET2));
@@ -212,39 +192,26 @@ async function loop() {
                     store = new Storage(`./data/${bot_struct.MARKET}.json`)
                     flag_store = 1
                 }
-                if (market_price != 0) {
+                if (market_price > 0) {
                     start_price = store.get('start_price');
-                    //console.clear()
-                    //log('=====================================================================')
-                    //_logProfits(market_price)
-                    //log('=====================================================================')
-
-                    //log(`Prev price: ${start_price}`)
-                    //log(`New price: ${market_price}`)
                     if (market_price < start_price) {
                         const factor = (start_price - market_price)
                         const percent = parseFloat(100 * factor / start_price).toFixed(2)
-                        //logColor(colors.red, `Losers: -${parseFloat(percent).toFixed(3)}% ==> -$${parseFloat(factor).toFixed(4)}`)
                         store.put('percent', `-${parseFloat(percent).toFixed(3)}`)
                         if (percent >= process.env.PRICE_PERCENT)
                             await _buy_kucoin(market_price);
-
                     } else {
                         const factor = (market_price - start_price)
                         const percent = 100 * factor / market_price
-                        //logColor(colors.green, `Gainers: +${parseFloat(percent).toFixed(3)}% ==> +$${parseFloat(factor).toFixed(4)}`)
                         store.put('percent', `+${parseFloat(percent).toFixed(3)}`)
                         await _sell_kucoin(market_price)
                     }
-                    const orders = store.get('orders')
-                    //if (orders.length > 0)
-                    //console.log(orders[orders.length - 1])
                 }
             }
         } catch (error) {
             logColor(colors.red, error)
         }
-        await sleep(20000);
+        await sleep(30000);
     }
 }
 
