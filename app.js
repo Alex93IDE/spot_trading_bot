@@ -215,13 +215,13 @@ async function loop() {
                 }
                 if (market_price != 0) {
                     start_price = store.get('start_price');
-                    console.clear()
-                    log('=====================================================================')
-                    _logProfits(market_price)
-                    log('=====================================================================')
+                    //console.clear()
+                    //log('=====================================================================')
+                    //_logProfits(market_price)
+                   // log('=====================================================================')
 
-                    log(`Prev price: ${start_price}`)
-                    log(`New price: ${market_price}`)
+                    //log(`Prev price: ${start_price}`)
+                    //log(`New price: ${market_price}`)
 
                     if (market_price < start_price) {
                         const factor = (start_price - market_price)
@@ -243,8 +243,8 @@ async function loop() {
                         await _sell_kucoin(market_price)
                     }
                     const orders = store.get('orders')
-                    if (orders.length > 0)
-                        console.log(orders[orders.length - 1])
+                    //if (orders.length > 0)
+                        //console.log(orders[orders.length - 1])
                 }
             }
         } catch (error) {
