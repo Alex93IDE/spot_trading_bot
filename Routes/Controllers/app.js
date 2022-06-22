@@ -23,8 +23,8 @@ exports.restart = function restart(req, res) {
 exports.process_bot = async function a(req, res) {
     let data = req.query;
     const words = data.symbol.split('-')
-    let symbol_1 = words[0].toUpperCase()
-    let symbol_2 = words[1].toUpperCase()
+    let symbol_1 = words[0]
+    let symbol_2 = words[1]
 
     switch (data.status) {
         case 'start':
