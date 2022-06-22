@@ -8,8 +8,11 @@ exports.home = async function home(req, res) {
     let price = (bot_struct.start_bot_trading) ? await getPriceMarket(bot_struct.MARKET) : 0
     res.json({
         system: system,
+        symbol: bot_struct.MARKET,
+        funds: bot_struct.base_quote,
         marketPrice: price,
-        store: store.store
+        store: store.store,
+
     })
 }
 
