@@ -70,10 +70,11 @@ async function _buy_kucoin(price) {
         if (res.code == '200000') {
             let idFillorder = ''
             let res_fill
+            sleep(3000)
             while (res.data.orderId != idFillorder) {
                 try {
                     res_fill = await getFillsId(bot_struct.MARKET, 'buy', res.data.orderId)
-                    sleep(5000)
+                    sleep(3000)
                     if (res_fill.data.items != undefined)
                         if (res_fill.data.items.length > 0)
                             idFillorder = res_fill.data.items[0].orderId
@@ -140,10 +141,11 @@ async function _sell_kucoin(price) {
             if (res.code == "200000") {
                 let idFillorder = ''
                 let res_fill
+                sleep(3000)
                 while (res.data.orderId != idFillorder) {
                     try {
                         res_fill = await getFillsId(bot_struct.MARKET, 'sell', res.data.orderId)
-                        sleep(5000)
+                        sleep(3000)
                         if (res_fill.data.items != undefined)
                             if (res_fill.data.items.length > 0)
                                 idFillorder = res_fill.data.items[0].orderId
