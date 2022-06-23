@@ -77,6 +77,7 @@ async function _buy_kucoin(price) {
                     if (res_fill.data.items != undefined)
                         if (res_fill.data.items.length > 0)
                             idFillorder = res_fill.data.items[0].orderId
+                    log(res_fill.data)
                 } catch (error) {
                     logColor(colors.red, error)
                 }
@@ -147,6 +148,7 @@ async function _sell_kucoin(price) {
                         if (res_fill.data.items != undefined)
                             if (res_fill.data.items.length > 0)
                                 idFillorder = res_fill.data.items[0].orderId
+                        log(res_fill.data)
                     } catch (error) {
                         logColor(colors.red, error)
                     }

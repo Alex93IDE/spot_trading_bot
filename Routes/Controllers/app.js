@@ -54,7 +54,7 @@ exports.process_bot = async function a(req, res) {
             bot_struct.MARKET1 = symbol_1
             bot_struct.MARKET2 = symbol_2
             bot_struct.MARKET = data.symbol
-            bot_struct.base_quote = parseInt(data.fund)
+            bot_struct.base_quote = parseFloat(data.fund)
 
             logColor(colors.green, 'BOT ENCENDIDO')
             bot_struct.start_bot_trading = 1;
