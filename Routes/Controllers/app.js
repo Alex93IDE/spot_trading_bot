@@ -6,6 +6,8 @@ exports.home = async function home(req, res) {
     let store = new Storage(`./data/${bot_struct.MARKET}.json`)
     let system = (bot_struct.start_bot_trading) ? 'ENCENDIDO' : 'DETENIDO'
     let price = (bot_struct.start_bot_trading) ? await getPriceMarket(bot_struct.MARKET) : 0
+    let current = (bot_struct.start_bot_trading) ? (price * store.get(`${bot_struct.MARKET1}_balance`)) + store.get(`${bot_struct.MARKET2}_balance`) : 0
+    
     res.json({
         system: system,
         symbol: bot_struct.MARKET,
