@@ -71,13 +71,12 @@ async function _buy_kucoin(price) {
             let idFillorder = ''
             let res_fill
             while (res.data.orderId != idFillorder) {
-                sleep(5000)
                 try {
                     res_fill = await getFillsId(bot_struct.MARKET, 'buy', res.data.orderId)
+                    sleep(5000)
                     if (res_fill.data.items != undefined)
                         if (res_fill.data.items.length > 0)
                             idFillorder = res_fill.data.items[0].orderId
-                    log(res_fill.data)
                 } catch (error) {
                     logColor(colors.red, error)
                 }
@@ -142,13 +141,12 @@ async function _sell_kucoin(price) {
                 let idFillorder = ''
                 let res_fill
                 while (res.data.orderId != idFillorder) {
-                    sleep(5000)
                     try {
                         res_fill = await getFillsId(bot_struct.MARKET, 'sell', res.data.orderId)
+                        sleep(5000)
                         if (res_fill.data.items != undefined)
                             if (res_fill.data.items.length > 0)
                                 idFillorder = res_fill.data.items[0].orderId
-                        log(res_fill.data)
                     } catch (error) {
                         logColor(colors.red, error)
                     }
