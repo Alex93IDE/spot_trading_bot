@@ -15,7 +15,6 @@ exports.home = async function home(req, res) {
         marketPrice: price,
         current: current,
         store: store.store,
-
     })
 }
 
