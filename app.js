@@ -79,12 +79,12 @@ async function _buy_kucoin(price) {
                         if (res_fill.data.items.length > 0)
                             idFillorder = res_fill.data.items[0].orderId
                 } catch (error) {
-                    
+
                 }
             }
             order.id = res.data.orderId
             if (res_fill.code == "200000") {
-                factor = process.env.PRICE_PERCENT * res_fill.data.items[0].price / 100
+                factor = process.env.PRICE_PERCENT_SELL * res_fill.data.items[0].price / 100
 
                 order.status = 'bought'
                 order.buy_price = parseFloat(res_fill.data.items[0].price)
@@ -150,7 +150,7 @@ async function _sell_kucoin(price) {
                             if (res_fill.data.items.length > 0)
                                 idFillorder = res_fill.data.items[0].orderId
                     } catch (error) {
-                        
+
                     }
                 }
                 if (res_fill.code == "200000") {
@@ -202,7 +202,7 @@ async function loop() {
                         const factor = (start_price - market_price)
                         const percent = parseFloat(100 * factor / start_price).toFixed(2)
                         store.put('percent', `-${parseFloat(percent).toFixed(3)}`)
-                        if (percent >= process.env.PRICE_PERCENT)
+                        if (percent >= process.env.PRICE_PERCENT_BUY)
                             await _buy_kucoin(market_price);
                     } else {
                         const factor = (market_price - start_price)
