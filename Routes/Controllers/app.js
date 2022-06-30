@@ -20,7 +20,7 @@ exports.home = async function home(req, res) {
 
     res.json({
         system: system,
-        time: days + ':' + hours + ':' + minutes + ':' + seconds,
+        time: days + 'd ' + hours + ':' + minutes + ':' + seconds,
         symbol: bot_struct.MARKET,
         funds: bot_struct.base_quote,
         marketPrice: price,
