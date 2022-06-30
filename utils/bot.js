@@ -6,7 +6,8 @@ var bot_struct = {
     MARKET1: '',
     MARKET2: '',
     start_bot_trading: 0,
-    base_quote: 0
+    base_quote: 0,
+    time: 0,
 }
 
 async function getBalance(coin) {

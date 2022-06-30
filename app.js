@@ -18,6 +18,8 @@ const sleep = (timeMs) => new Promise(resolve => setTimeout(resolve, timeMs))
 
 var flag_store = 0
 var store = ''
+var storeGeneral = ''
+var counterTime = 0
 
 function _newPriceReset(_market, balance, price) {
 
@@ -194,6 +196,7 @@ async function loop() {
                 market_price = await getPriceMarket(bot_struct.MARKET);
                 if (flag_store == 0) {
                     store = new Storage(`./data/${bot_struct.MARKET}.json`)
+                    storeGeneral = new Storage('./data/general.json')
                     flag_store = 1
                 }
                 if (market_price > 0) {
@@ -223,6 +226,17 @@ async function setup() {
     server.listen(process.env.PORT || process.env.ALWAYSDATA_HTTPD_PORT || port, process.env.ALWAYSDATA_HTTPD_IP || process.env.IP || '127.0.0.1', () => {
         console.log(`Servidor corriendo por el puerto ${port}`);
     });
+    setInterval(() => {
+        if (bot_struct.start_bot_trading == 1) {
+            counterTime++
+            bot_struct.time++
+
+            if (counterTime >= 10 && flag_store == 1) {
+                storeGeneral.put('time', bot_struct.time)
+                counterTime = 0
+            }
+        }
+    }, 1000);
     loop();
 }
 
