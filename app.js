@@ -53,6 +53,8 @@ async function _buy_kucoin(price) {
             sold_price: 0,
             status: 'pending',
             profit: 0,
+            fee_buy: 0,
+            fee_sell: 0,
         }
         log(`
             Buying ${bot_struct.MARKET1}
@@ -92,6 +94,7 @@ async function _buy_kucoin(price) {
                 order.buy_price = parseFloat(res_fill.data.items[0].price)
                 order.amount = parseFloat(res_fill.data.items[0].size)
                 order.sell_price = parseFloat(order.buy_price + factor)
+                order.fee_buy = parseFloat(res_fill.data.items[0].fee)
 
                 store.put('start_price', order.buy_price)
                 store.put(`${bot_struct.MARKET1}_balance`, await getBalance(bot_struct.MARKET1));
@@ -140,6 +143,7 @@ async function _sell_kucoin(price) {
                 type: 'market',
                 tradeType: 'TRADE'
             }, { size: amountToSell })
+
             if (res.code == "200000") {
                 let idFillorder = ''
                 let res_fill
@@ -151,19 +155,22 @@ async function _sell_kucoin(price) {
                         if (res_fill.data.items != undefined)
                             if (res_fill.data.items.length > 0)
                                 idFillorder = res_fill.data.items[0].orderId
-                    } catch (error) {
-
-                    }
+                    } catch (error) { }
                 }
                 if (res_fill.code == "200000") {
                     const _price = parseFloat(res_fill.data.items[0].price)
+                    const _fee = parseFloat(res_fill.data.items[0].fee)
+
                     for (var i = 0; i < orders.length; i++) {
                         var order = orders[i]
                         for (var j = 0; j < toSold.length; j++) {
                             if (order.id == toSold[j].id) {
                                 toSold[j].profit = (parseFloat(toSold[j].amount) * _price)
                                     - (parseFloat(toSold[j].amount) * parseFloat(toSold[j].buy_price))
+                                order.fee_sell = parseFloat(_fee / toSold.length)
+                                toSold[j].profit -= order.fee_buy + order.fee_sell
                                 toSold[j].status = 'sold'
+                                toSold[j].sold_price = _price
                                 orders[i] = toSold[j]
                             }
                         }
