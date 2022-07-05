@@ -23,6 +23,8 @@ exports.home = async function home(req, res) {
         time: days + 'd ' + hours + ':' + minutes + ':' + seconds,
         symbol: bot_struct.MARKET,
         funds: bot_struct.base_quote,
+        percent_buy: bot_struct.PRICE_PERCENT_BUY,
+        percent_sell: bot_struct.PRICE_PERCENT_SELL,
         marketPrice: price,
         current: current,
         store: store.store,
@@ -59,6 +61,7 @@ exports.process_bot = async function a(req, res) {
             store.put(`${symbol_2}_balance`, await getBalance(symbol_2));
             store.put(`initial_${symbol_1}_balance`, store.get(`${symbol_1}_balance`));
             store.put(`initial_${symbol_2}_balance`, store.get(`${symbol_2}_balance`));
+            store.put('orders_sold', []);
 
             logColor(colors.green, 'BOT ENCENDIDO')
             bot_struct.start_bot_trading = 1;

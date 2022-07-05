@@ -8,6 +8,8 @@ var bot_struct = {
     start_bot_trading: 0,
     base_quote: 0,
     time: 0,
+    PRICE_PERCENT_SELL: 1,
+    PRICE_PERCENT_BUY: 1.5
 }
 
 async function getBalance(coin) {
