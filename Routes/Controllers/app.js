@@ -22,11 +22,11 @@ exports.home = async function home(req, res) {
         system: system,
         time: days + 'd ' + hours + ':' + minutes + ':' + seconds,
         symbol: bot_struct.MARKET,
-        funds: '$' + bot_struct.base_quote,
-        percent_buy: bot_struct.PRICE_PERCENT_BUY + '%',
-        percent_sell: bot_struct.PRICE_PERCENT_SELL + '%',
-        marketPrice: '$' + price,
-        current: '$' + current,
+        funds: bot_struct.base_quote,
+        percent_buy: bot_struct.PRICE_PERCENT_BUY,
+        percent_sell: bot_struct.PRICE_PERCENT_SELL,
+        marketPrice: price,
+        current: current,
         store: store.store,
     })
 }
