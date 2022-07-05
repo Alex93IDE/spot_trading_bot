@@ -43,6 +43,7 @@ exports.process_bot = async function a(req, res) {
     const words = data.symbol.split('-')
     let symbol_1 = words[0]
     let symbol_2 = words[1]
+    let storeGeneral = new Storage('./data/general.json')
 
     switch (data.status) {
         case 'start':
@@ -62,13 +63,13 @@ exports.process_bot = async function a(req, res) {
             store.put(`initial_${symbol_1}_balance`, store.get(`${symbol_1}_balance`));
             store.put(`initial_${symbol_2}_balance`, store.get(`${symbol_2}_balance`));
             store.put('orders_sold', []);
+            storeGeneral.put('time', bot_struct.time);
 
             logColor(colors.green, 'BOT ENCENDIDO')
             bot_struct.start_bot_trading = 1;
             res.json('BOT ENCENDIDO START')
             break;
         case 'continue':
-            let storeGeneral = new Storage('./data/general.json')
             bot_struct.MARKET1 = symbol_1
             bot_struct.MARKET2 = symbol_2
             bot_struct.MARKET = data.symbol
