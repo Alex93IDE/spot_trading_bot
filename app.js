@@ -1,7 +1,7 @@
 require('dotenv').config()
 const express = require('express')
 const { log, logColor, colors } = require('./utils/logger')
-const { bot_struct, getBalance, getPriceMarket, _buy, getFillsId, _sell, getBaseSize } = require('./utils/bot')
+const { bot_struct, getBalance, getPriceMarket, _buy, getFillsId, _sell, getBaseSize, getFillsAll } = require('./utils/bot')
 const Storage = require('node-storage')
 const server = express();
 const port = 8080;
@@ -247,6 +247,8 @@ async function setup() {
             }
         }
     }, 1000);
+    //let rr = await getFillsAll('ETH-USDT', 'sell')
+    //console.log(rr.data.items);
     loop();
 }
 

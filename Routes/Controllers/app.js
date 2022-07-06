@@ -91,3 +91,17 @@ exports.process_bot = async function a(req, res) {
             break;
     }
 }
+
+exports.percent = async function percent(req, res) {
+    let old_percent_buy = bot_struct.PRICE_PERCENT_BUY
+    let old_percent_sell = bot_struct.PRICE_PERCENT_SELL
+
+    let new_percent_buy = req.body.buy
+    let new_percent_sell = req.body.sell
+
+    bot_struct.PRICE_PERCENT_BUY = new_percent_buy
+    bot_struct.PRICE_PERCENT_SELL = new_percent_sell
+
+    res.json('Percent change' + ' buy: ' + old_percent_buy + ' to ' + bot_struct.PRICE_PERCENT_BUY +
+        ' Sell: ' + old_percent_sell + ' to ' + bot_struct.PRICE_PERCENT_SELL)
+}
