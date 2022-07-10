@@ -1,4 +1,5 @@
 # spot_trading_bot
+Bot de trading en el Mercado de spot en Kucoin.
 
 # /sevices/config.json
 
