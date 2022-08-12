@@ -7,7 +7,7 @@ ruta.get('/', home)
 ruta.get('/restart', restart)
 ruta.get('/bot', process_bot)
 ruta.post('/percent', percent)
-ruta.post('/restart/data', commandTerminalDeleteData)
+ruta.get('/restart/data', commandTerminalDeleteData)
 
 ruta.get('/restart/bot', (req, res) => {
     setTimeout(() => {
