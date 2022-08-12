@@ -1,6 +1,7 @@
 const Storage = require('node-storage')
 const { bot_struct, getPriceMarket, getBalance } = require('../../utils/bot')
 const { log, logColor, colors } = require('../../utils/logger')
+const { exec } = require('child_process')
 
 exports.home = async function home(req, res) {
     let store = new Storage(`./data/${bot_struct.MARKET}.json`)
@@ -47,21 +48,21 @@ exports.process_bot = async function a(req, res) {
 
     switch (data.status) {
         case 'start':
-            bot_struct.MARKET1 = symbol_1
-            bot_struct.MARKET2 = symbol_2
-            bot_struct.MARKET = data.symbol
+            bot_struct.MARKET1 = symbol_1.toUpperCase();
+            bot_struct.MARKET2 = symbol_2.toUpperCase();
+            bot_struct.MARKET = data.symbol.toUpperCase();
             bot_struct.time = 0
-            bot_struct.base_quote = parseInt(data.fund)
+            bot_struct.base_quote = parseFloat(data.fund)
             let store = new Storage(`./data/${bot_struct.MARKET}.json`)
 
             store.put('start_price', await getPriceMarket(bot_struct.MARKET))
             store.put('orders', []);
             store.put('profits', 0);
             store.put('percent', 0);
-            store.put(`${symbol_1}_balance`, await getBalance(symbol_1));
-            store.put(`${symbol_2}_balance`, await getBalance(symbol_2));
-            store.put(`initial_${symbol_1}_balance`, store.get(`${symbol_1}_balance`));
-            store.put(`initial_${symbol_2}_balance`, store.get(`${symbol_2}_balance`));
+            store.put(`${bot_struct.MARKET1}_balance`, await getBalance(bot_struct.MARKET1));
+            store.put(`${bot_struct.MARKET2}_balance`, await getBalance(bot_struct.MARKET2));
+            store.put(`initial_${bot_struct.MARKET1}_balance`, store.get(`${bot_struct.MARKET1}_balance`));
+            store.put(`initial_${bot_struct.MARKET2}_balance`, store.get(`${bot_struct.MARKET2}_balance`));
             store.put('orders_sold', []);
             storeGeneral.put('time', bot_struct.time);
 
@@ -70,9 +71,9 @@ exports.process_bot = async function a(req, res) {
             res.json('BOT ENCENDIDO START')
             break;
         case 'continue':
-            bot_struct.MARKET1 = symbol_1
-            bot_struct.MARKET2 = symbol_2
-            bot_struct.MARKET = data.symbol
+            bot_struct.MARKET1 = symbol_1.toUpperCase();
+            bot_struct.MARKET2 = symbol_2.toUpperCase();
+            bot_struct.MARKET = data.symbol.toUpperCase();
             bot_struct.base_quote = parseFloat(data.fund)
             bot_struct.time = storeGeneral.get('time')
             if (bot_struct.time == null)
@@ -104,4 +105,18 @@ exports.percent = async function percent(req, res) {
 
     res.json('Percent change' + ' buy: ' + old_percent_buy + ' to ' + bot_struct.PRICE_PERCENT_BUY +
         ' Sell: ' + old_percent_sell + ' to ' + bot_struct.PRICE_PERCENT_SELL)
+}
+
+exports.commandTerminalDeleteData = async (req, res) => {
+    exec('rm -rfv data/', (error, stdout, stderr) => {
+        if (error) {
+            res.json(`error: ${error.message}`);
+            return;
+        }
+        if (stderr) {
+            res.json(`stderr: ${stderr}`);
+            return;
+        }
+        res.json(`stdout: ${stdout}`);
+    })
 }
