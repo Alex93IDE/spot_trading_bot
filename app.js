@@ -3,11 +3,18 @@ const express = require('express')
 const { log, logColor, colors } = require('./utils/logger')
 const { bot_struct, getBalance, getPriceMarket, _buy, getFillsId, _sell, getBaseSize, getFillsAll } = require('./utils/bot')
 const Storage = require('node-storage')
+const cors = require('cors')
+
 const server = express();
 const port = 8080;
+var corsOptions = {
+    origin: 'http://localhost:9010',
+    optionsSuccessStatus: 200
+}
 
 //Settings
 server.set('json spaces', 2);
+server.use(cors(corsOptions));
 
 //Middlewares
 server.use(express.json());  //entiende los formatos json y los convierte a objetos
