@@ -196,6 +196,7 @@ async function _sell_kucoin(price) {
                     while (i--)
                         if (orders[i].status === 'sold') {
                             orders_sold.push(orders[i])
+                            if (orders_sold.length > 100) orders_sold.shift();
                             orders.splice(i, 1)
                         }
                 }
