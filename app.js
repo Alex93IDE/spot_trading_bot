@@ -143,7 +143,7 @@ async function _sell_kucoin(price) {
                 amountIn: ${totalAmount.toFixed(2)} ${bot_struct.MARKET1}
                 amountOut: ${parseFloat(totalAmount * price).toFixed(2)} ${bot_struct.MARKET2}
             `)
-            let amountToSell = await getBaseSize(bot_struct.MARKET1, totalAmount)
+            let amountToSell = await getBaseSize(bot_struct.MARKET, totalAmount)
             let res = await _sell({
                 clientOid: Date.now(),
                 side: 'sell',

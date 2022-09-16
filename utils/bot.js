@@ -31,7 +31,7 @@ async function getBaseSize(coin, cant) {  //Devuelve la cantidad exacta de moned
     let base = 0;
     let valor_de_operacion = 0;
     for (let index = 0; index < r.data.length; index++) {
-        if (r.data[index].symbol == coin + '-USDT')
+        if (r.data[index].symbol == coin)
             base = +r.data[index].baseIncrement;
     }
     if (base != 0) {
