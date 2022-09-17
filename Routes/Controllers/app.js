@@ -107,6 +107,14 @@ exports.percent = async function percent(req, res) {
         ' Sell: ' + old_percent_sell + ' to ' + bot_struct.PRICE_PERCENT_SELL)
 }
 
+exports.funds = async (req, res) => {
+    let old_fund = bot_struct.base_quote;
+    let new_fund = req.body.fund;
+    bot_struct.base_quote = new_fund;
+
+    res.json('Fund change of ' + old_fund + ' to ' + bot_struct.base_quote)
+}
+
 exports.commandTerminalDeleteData = async (req, res) => {
     exec('rm -rfv data/', (error, stdout, stderr) => {
         if (error) {
