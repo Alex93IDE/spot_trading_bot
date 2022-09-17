@@ -1,4 +1,4 @@
-const { _buy, _sell, bot_struct } = require('../../utils/bot')
+const { _buy, _sell, bot_struct, getBaseSize } = require('../../utils/bot')
 
 exports.placeOrder = async (req, res) => {
     let data = req.body
