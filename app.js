@@ -202,7 +202,7 @@ async function _sell_kucoin(price) {
                     while (i--)
                         if (orders[i].status === 'sold') {
                             orders_sold.push(orders[i])
-                            if (orders_sold.length > 100) orders_sold.shift();
+                            if (orders_sold.length > 200) orders_sold.shift();
                             orders.splice(i, 1)
                         }
                 }
@@ -259,11 +259,14 @@ async function setup() {
                 storeGeneral.put('time', bot_struct.time)
                 counterTime = 0
             }
-            if (counterTimeHistory >= 300 && flag_store == 1) {
+            if (counterTimeHistory >= 14400 && flag_store == 1) {
                 history_price.push({
                     time: Date.now(),
-                    price: parseFloat(market_price)
+                    price: parseFloat(market_price),
+                    current: (market_price * store.get(`${bot_struct.MARKET1}_balance`)) + store.get(`${bot_struct.MARKET2}_balance`),
+                    profit: store.get('profits')
                 })
+                if (history_price.length > 400) history_price.shift();
             }
         }
     }, 1000);
