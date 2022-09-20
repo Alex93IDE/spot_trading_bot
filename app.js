@@ -267,6 +267,7 @@ async function setup() {
                     profit: store.get('profits')
                 })
                 if (history_price.length > 400) history_price.shift();
+                counterTimeHistory = 0;
             }
         }
     }, 1000);
