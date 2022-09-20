@@ -27,6 +27,9 @@ var flag_store = 0
 var store = ''
 var storeGeneral = ''
 var counterTime = 0
+var counterTimeHistory = 0
+var history_price = []
+var market_price = 0;
 
 function _newPriceReset(_market, balance, price) {
 
@@ -53,6 +56,8 @@ async function _buy_kucoin(price) {
         var orders = store.get('orders')
         var factor = 0;
         var order = {
+            date_buy: Date.now(),
+            date_sell: '',
             id: '',
             buy_price: 0,
             amount: 0,
@@ -179,6 +184,7 @@ async function _sell_kucoin(price) {
                                 toSold[j].profit -= order.fee_buy + order.fee_sell
                                 toSold[j].status = 'sold'
                                 toSold[j].sold_price = _price
+                                toSold[j].date_sell = Date.now()
                                 orders[i] = toSold[j]
                             }
                         }
@@ -206,7 +212,6 @@ async function _sell_kucoin(price) {
 }
 
 async function loop() {
-    let market_price = 0;
     let start_price = 0;
     while (true) {
         try {
@@ -215,6 +220,7 @@ async function loop() {
                 if (flag_store == 0) {
                     store = new Storage(`./data/${bot_struct.MARKET}.json`)
                     storeGeneral = new Storage('./data/general.json')
+                    history_price = store.get('history_price')
                     flag_store = 1
                 }
                 if (market_price > 0) {
@@ -248,10 +254,16 @@ async function setup() {
         if (bot_struct.start_bot_trading == 1) {
             counterTime++
             bot_struct.time++
-
+            counterTimeHistory++
             if (counterTime >= 10 && flag_store == 1) {
                 storeGeneral.put('time', bot_struct.time)
                 counterTime = 0
+            }
+            if (counterTimeHistory >= 300 && flag_store == 1) {
+                history_price.push({
+                    time: Date.now(),
+                    price: parseFloat(market_price)
+                })
             }
         }
     }, 1000);

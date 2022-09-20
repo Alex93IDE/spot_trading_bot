@@ -64,6 +64,7 @@ exports.process_bot = async function a(req, res) {
             store.put(`initial_${bot_struct.MARKET1}_balance`, store.get(`${bot_struct.MARKET1}_balance`));
             store.put(`initial_${bot_struct.MARKET2}_balance`, store.get(`${bot_struct.MARKET2}_balance`));
             store.put('orders_sold', []);
+            store.put('history_price', []);
             storeGeneral.put('time', bot_struct.time);
 
             logColor(colors.green, 'BOT ENCENDIDO')
