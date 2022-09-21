@@ -260,6 +260,7 @@ async function setup() {
                 counterTime = 0
             }
             if (counterTimeHistory >= 14400 && flag_store == 1) {
+                console.log('testing');
                 counterTimeHistory = 0;
                 history_price.push({
                     time: Date.now(),
