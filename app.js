@@ -260,6 +260,7 @@ async function setup() {
                 counterTime = 0
             }
             if (counterTimeHistory >= 14400 && flag_store == 1) {
+                counterTimeHistory = 0;
                 history_price.push({
                     time: Date.now(),
                     price: parseFloat(market_price),
@@ -267,7 +268,6 @@ async function setup() {
                     profit: store.get('profits')
                 })
                 if (history_price.length > 400) history_price.shift();
-                counterTimeHistory = 0;
             }
         }
     }, 1000);
