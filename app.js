@@ -8,7 +8,7 @@ const cors = require('cors')
 const server = express();
 const port = 8080;
 var corsOptions = {
-    origin: 'http://localhost:9010',
+    origin: '*',
     optionsSuccessStatus: 200
 }
 
