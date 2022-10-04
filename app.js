@@ -227,13 +227,13 @@ async function loop() {
                     start_price = store.get('start_price');
                     if (market_price < start_price) {
                         const factor = (start_price - market_price)
-                        const percent = parseFloat(100 * factor / start_price).toFixed(2)
+                        const percent = parseFloat(100 * factor / start_price)
                         store.put('percent', `-${parseFloat(percent).toFixed(3)}`)
                         if (percent >= bot_struct.PRICE_PERCENT_BUY)
                             await _buy_kucoin(market_price);
                     } else {
                         const factor = (market_price - start_price)
-                        const percent = 100 * factor / market_price
+                        const percent = parseFloat(100 * factor / market_price)
                         store.put('percent', `+${parseFloat(percent).toFixed(3)}`)
                         await _sell_kucoin(market_price)
                     }

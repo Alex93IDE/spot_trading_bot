@@ -1,5 +1,6 @@
-# spot_trading_bot
-Bot de trading en el Mercado de spot en Kucoin.
+# Spot_trading_bot
+Bot de trading en el mercado de spot en Kucoin con órdenes de mercado.
+Se inicializa y configura a través de los métodos HTTP(GET y POST)
 
 # /sevices/config.json
 
