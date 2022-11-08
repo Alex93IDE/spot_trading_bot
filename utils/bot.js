@@ -82,6 +82,15 @@ async function getFillsAll(symbol, side) {
     return res
 }
 
+async function getOrder(id) {
+    try {
+        const res = await API.rest.Trade.Orders.getOrderByID(id)
+        return res
+    } catch (error) {
+        console.log(error);
+    }
+}
+
 module.exports = {
     bot_struct,
     getBalance,
@@ -90,5 +99,6 @@ module.exports = {
     _sell,
     getFillsId,
     getBaseSize,
-    getFillsAll
+    getFillsAll,
+    getOrder
 }

@@ -32,15 +32,9 @@ exports.home = async function home(req, res) {
     })
 }
 
-exports.restart = function restart(req, res) {
-    setTimeout(() => {
-        process.exit()
-    }, 1000);
-    res.json("done")
-}
-
 exports.process_bot = async function a(req, res) {
     let data = req.query;
+    console.log(data);
     const words = data.symbol.split('-')
     let symbol_1 = words[0]
     let symbol_2 = words[1]

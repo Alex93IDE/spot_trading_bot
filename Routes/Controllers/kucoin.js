@@ -1,11 +1,12 @@
-const { _buy, _sell, bot_struct, getBaseSize } = require('../../utils/bot')
+const { _buy, _sell, bot_struct, getBaseSize, getOrder } = require('../../utils/bot')
+const { v4: uuidv4 } = require('uuid')
 
 exports.placeOrder = async (req, res) => {
     let data = req.body
     if (data.side === 'buy') {
         const result = await _buy(
             {
-                clientOid: Date.now(),
+                clientOid: uuidv4(),
                 side: 'buy',
                 symbol: data.symbol,
                 type: 'market',
@@ -18,7 +19,7 @@ exports.placeOrder = async (req, res) => {
         let amountToSell = await getBaseSize(data.symbol, data.size)
         const result = await _sell(
             {
-                clientOid: Date.now(),
+                clientOid: uuidv4(),
                 side: 'sell',
                 symbol: data.symbol,
                 type: 'market',
@@ -28,4 +29,10 @@ exports.placeOrder = async (req, res) => {
         )
         res.json(result);
     }
+}
+
+exports.getOrder = async (req, res) => {
+    let data = req.params.id;
+    const result = await getOrder(data);
+    res.json(result)
 }

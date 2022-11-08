@@ -1,9 +1,10 @@
 require('dotenv').config()
 const express = require('express')
 const { log, logColor, colors } = require('./utils/logger')
-const { bot_struct, getBalance, getPriceMarket, _buy, getFillsId, _sell, getBaseSize, getFillsAll } = require('./utils/bot')
+const { bot_struct, getBalance, getPriceMarket, _buy, getFillsId, _sell, getBaseSize, getFillsAll, getOrder } = require('./utils/bot')
 const Storage = require('node-storage')
 const cors = require('cors')
+const { v4: uuidv4 } = require('uuid')
 
 const server = express();
 const port = 8080;
@@ -58,7 +59,7 @@ async function _buy_kucoin(price) {
         var order = {
             date_buy: Date.now(),
             date_sell: '',
-            id: '',
+            id: uuidv4(),
             buy_price: 0,
             amount: 0,
             sell_price: 0,
@@ -75,51 +76,37 @@ async function _buy_kucoin(price) {
             amountOut: ${bot_struct.base_quote / price} ${bot_struct.MARKET1}
         `)
 
-        let res = await _buy({
-            clientOid: Date.now(),
+        const res = await _buy({
+            clientOid: order.id,
             side: 'buy',
             symbol: bot_struct.MARKET,
             type: 'market',
             tradeType: 'TRADE'
         }, { funds: bot_struct.base_quote })
 
-        if (res.code == '200000') {
-            let idFillorder = ''
-            let res_fill
-            await sleep(3000)
-            while (res.data.orderId != idFillorder) {
-                try {
-                    res_fill = await getFillsId(bot_struct.MARKET, 'buy', res.data.orderId)
-                    await sleep(1500)
-                    if (res_fill.data.items != undefined)
-                        if (res_fill.data.items.length > 0)
-                            idFillorder = res_fill.data.items[0].orderId
-                } catch (error) {
+        if (res && res.code == '200000') {
+            order.status = 'bought'
 
-                }
-            }
-            order.id = res.data.orderId
-            if (res_fill.code == "200000") {
-                factor = bot_struct.PRICE_PERCENT_SELL * res_fill.data.items[0].price / 100
+            const orderRes = await getOrder(res.data.orderId)
 
-                order.status = 'bought'
-                order.buy_price = parseFloat(res_fill.data.items[0].price)
-                order.amount = parseFloat(res_fill.data.items[0].size)
-                order.sell_price = parseFloat(order.buy_price + factor)
-                order.fee_buy = parseFloat(res_fill.data.items[0].fee)
+            order.buy_price = parseFloat(orderRes.data.dealFunds) / parseFloat(orderRes.data.dealSize)
+            order.amount = parseFloat(orderRes.data.dealSize)
+            factor = bot_struct.PRICE_PERCENT_SELL * order.buy_price / 100
+            order.sell_price = parseFloat(order.buy_price + factor)
+            order.fee_buy = parseFloat(orderRes.data.fee)
 
-                store.put('start_price', order.buy_price)
-                store.put(`${bot_struct.MARKET1}_balance`, await getBalance(bot_struct.MARKET1));
-                store.put(`${bot_struct.MARKET2}_balance`, await getBalance(bot_struct.MARKET2));
+            store.put('start_price', order.buy_price)
+            store.put(`${bot_struct.MARKET1}_balance`, await getBalance(bot_struct.MARKET1));
+            store.put(`${bot_struct.MARKET2}_balance`, await getBalance(bot_struct.MARKET2));
 
-                orders.push(order)
+            orders.push(order)
 
-                log('================================================================')
-                log(`Bought ${bot_struct.base_quote / price} ${bot_struct.MARKET1} for ${parseFloat(bot_struct.base_quote).toFixed(2)} ${bot_struct.MARKET2}, Price: ${order.buy_price}\n`)
-                log('================================================================')
+            log('================================================================')
+            log(`Bought ${bot_struct.base_quote / price} ${bot_struct.MARKET1} for ${parseFloat(bot_struct.base_quote).toFixed(2)} ${bot_struct.MARKET2}, Price: ${order.buy_price}\n`)
+            log('================================================================')
 
-                await _calculateProfits()
-            }
+            await _calculateProfits()
+
         } else _newPriceReset(2, bot_struct.base_quote, price)
     } else _newPriceReset(2, bot_struct.base_quote, price)
 }
@@ -149,63 +136,53 @@ async function _sell_kucoin(price) {
                 amountOut: ${parseFloat(totalAmount * price).toFixed(2)} ${bot_struct.MARKET2}
             `)
             let amountToSell = await getBaseSize(bot_struct.MARKET, totalAmount)
-            let res = await _sell({
-                clientOid: Date.now(),
+            const res = await _sell({
+                clientOid: uuidv4(),
                 side: 'sell',
                 symbol: bot_struct.MARKET,
                 type: 'market',
                 tradeType: 'TRADE'
             }, { size: amountToSell })
 
-            if (res.code == "200000") {
-                let idFillorder = ''
-                let res_fill
-                await sleep(3000)
-                while (res.data.orderId != idFillorder) {
-                    try {
-                        res_fill = await getFillsId(bot_struct.MARKET, 'sell', res.data.orderId)
-                        await sleep(1500)
-                        if (res_fill.data.items != undefined)
-                            if (res_fill.data.items.length > 0)
-                                idFillorder = res_fill.data.items[0].orderId
-                    } catch (error) { }
-                }
-                if (res_fill.code == "200000") {
-                    const _price = parseFloat(res_fill.data.items[0].price)
-                    const _fee = parseFloat(res_fill.data.items[0].fee)
+            if (res && res.code == "200000") {
 
-                    for (var i = 0; i < orders.length; i++) {
-                        var order = orders[i]
-                        for (var j = 0; j < toSold.length; j++) {
-                            if (order.id == toSold[j].id) {
-                                toSold[j].profit = (parseFloat(toSold[j].amount) * _price)
-                                    - (parseFloat(toSold[j].amount) * parseFloat(toSold[j].buy_price))
-                                order.fee_sell = parseFloat(_fee / toSold.length)
-                                toSold[j].profit -= order.fee_buy + order.fee_sell
-                                toSold[j].status = 'sold'
-                                toSold[j].sold_price = _price
-                                toSold[j].date_sell = Date.now()
-                                orders[i] = toSold[j]
-                            }
+                const orderRes = await getOrder(res.data.orderId)
+
+                const _price = parseFloat(orderRes.data.dealFunds) / parseFloat(orderRes.data.dealSize)
+                const _fee = parseFloat(orderRes.data.fee)
+
+                for (var i = 0; i < orders.length; i++) {
+                    var order = orders[i]
+                    for (var j = 0; j < toSold.length; j++) {
+                        if (order.id == toSold[j].id) {
+                            toSold[j].profit = (parseFloat(toSold[j].amount) * _price)
+                                - (parseFloat(toSold[j].amount) * parseFloat(toSold[j].buy_price))
+                            order.fee_sell = parseFloat(_fee / toSold.length)
+                            toSold[j].profit -= order.fee_buy + order.fee_sell
+                            toSold[j].status = 'sold'
+                            toSold[j].sold_price = _price
+                            toSold[j].date_sell = Date.now()
+                            orders[i] = toSold[j]
                         }
                     }
-                    store.put('start_price', _price)
-                    store.put(`${bot_struct.MARKET1}_balance`, await getBalance(bot_struct.MARKET1));
-                    store.put(`${bot_struct.MARKET2}_balance`, await getBalance(bot_struct.MARKET2));
-
-                    log('===========================================================')
-                    log(`Sold ${totalAmount} ${bot_struct.MARKET1} for ${parseFloat(totalAmount * _price).toFixed(2)} ${bot_struct.MARKET2}, Price: ${_price}\n`)
-                    log('===========================================================')
-
-                    await _calculateProfits()
-                    var i = orders.length
-                    while (i--)
-                        if (orders[i].status === 'sold') {
-                            orders_sold.push(orders[i])
-                            if (orders_sold.length > 200) orders_sold.shift();
-                            orders.splice(i, 1)
-                        }
                 }
+                store.put('start_price', _price)
+                store.put(`${bot_struct.MARKET1}_balance`, await getBalance(bot_struct.MARKET1));
+                store.put(`${bot_struct.MARKET2}_balance`, await getBalance(bot_struct.MARKET2));
+
+                log('===========================================================')
+                log(`Sold ${totalAmount} ${bot_struct.MARKET1} for ${parseFloat(totalAmount * _price).toFixed(2)} ${bot_struct.MARKET2}, Price: ${_price}\n`)
+                log('===========================================================')
+
+                await _calculateProfits()
+                var i = orders.length
+                while (i--)
+                    if (orders[i].status === 'sold') {
+                        orders_sold.push(orders[i])
+                        if (orders_sold.length > 200) orders_sold.shift();
+                        orders.splice(i, 1)
+                    }
+
             } else store.put('start_price', price)
         } else store.put('start_price', price)
     } else store.put('start_price', price)
