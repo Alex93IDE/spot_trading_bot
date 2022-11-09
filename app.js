@@ -88,7 +88,7 @@ async function _buy_kucoin(price) {
             order.status = 'bought'
 
             const orderRes = await getOrder(res.data.orderId)
-
+            await sleep(1000);
             order.buy_price = parseFloat(orderRes.data.dealFunds) / parseFloat(orderRes.data.dealSize)
             order.amount = parseFloat(orderRes.data.dealSize)
             factor = bot_struct.PRICE_PERCENT_SELL * order.buy_price / 100
@@ -147,7 +147,7 @@ async function _sell_kucoin(price) {
             if (res && res.code == "200000") {
 
                 const orderRes = await getOrder(res.data.orderId)
-
+                await sleep(1000);
                 const _price = parseFloat(orderRes.data.dealFunds) / parseFloat(orderRes.data.dealSize)
                 const _fee = parseFloat(orderRes.data.fee)
 
