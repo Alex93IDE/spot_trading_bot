@@ -84,7 +84,7 @@ async function getFillsAll(symbol, side) {
 
 async function getOrder(id) {
     try {
-        const res = await API.rest.Trade.Orders.getOrderByID(id)
+        const res = await API.rest.Trade.Orders.getSingleActiveOrderByClientOid(id)
         return res
     } catch (error) {
         console.log(error);

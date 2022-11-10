@@ -85,28 +85,43 @@ async function _buy_kucoin(price) {
         }, { funds: bot_struct.base_quote })
 
         if (res && res.code == '200000') {
+            let idFillorder = ''
+            let res_fill
             order.status = 'bought'
+            await sleep(3000);
 
-            const orderRes = await getOrder(res.data.orderId)
-            await sleep(1000);
-            order.buy_price = parseFloat(orderRes.data.dealFunds) / parseFloat(orderRes.data.dealSize)
-            order.amount = parseFloat(orderRes.data.dealSize)
-            factor = bot_struct.PRICE_PERCENT_SELL * order.buy_price / 100
-            order.sell_price = parseFloat(order.buy_price + factor)
-            order.fee_buy = parseFloat(orderRes.data.fee)
+            while (res.data.orderId != idFillorder) {
+                try {
+                    await sleep(1500)
+                    res_fill = await getFillsId(bot_struct.MARKET, 'buy', res.data.orderId)
+                    if (res_fill.data.items != undefined)
+                        if (res_fill.data.items.length > 0)
+                            idFillorder = res_fill.data.items[0].orderId
+                } catch (error) {
+                    log('await')
+                }
+            }
 
-            store.put('start_price', order.buy_price)
-            store.put(`${bot_struct.MARKET1}_balance`, await getBalance(bot_struct.MARKET1));
-            store.put(`${bot_struct.MARKET2}_balance`, await getBalance(bot_struct.MARKET2));
+            if (res_fill.code == "200000") {
+                factor = bot_struct.PRICE_PERCENT_SELL * res_fill.data.items[0].price / 100
 
-            orders.push(order)
+                order.buy_price = parseFloat(res_fill.data.items[0].price)
+                order.amount = parseFloat(res_fill.data.items[0].size)
+                order.sell_price = parseFloat(order.buy_price + factor)
+                order.fee_buy = parseFloat(res_fill.data.items[0].fee)
 
-            log('================================================================')
-            log(`Bought ${bot_struct.base_quote / price} ${bot_struct.MARKET1} for ${parseFloat(bot_struct.base_quote).toFixed(2)} ${bot_struct.MARKET2}, Price: ${order.buy_price}\n`)
-            log('================================================================')
+                store.put('start_price', order.buy_price)
+                store.put(`${bot_struct.MARKET1}_balance`, await getBalance(bot_struct.MARKET1));
+                store.put(`${bot_struct.MARKET2}_balance`, await getBalance(bot_struct.MARKET2));
 
-            await _calculateProfits()
+                orders.push(order)
 
+                log('================================================================')
+                log(`Bought ${bot_struct.base_quote / price} ${bot_struct.MARKET1} for ${parseFloat(bot_struct.base_quote).toFixed(2)} ${bot_struct.MARKET2}, Price: ${order.buy_price}\n`)
+                log('================================================================')
+
+                await _calculateProfits()
+            }
         } else _newPriceReset(2, bot_struct.base_quote, price)
     } else _newPriceReset(2, bot_struct.base_quote, price)
 }
@@ -145,44 +160,57 @@ async function _sell_kucoin(price) {
             }, { size: amountToSell })
 
             if (res && res.code == "200000") {
+                let idFillorder = ''
+                let res_fill
+                await sleep(3000);
 
-                const orderRes = await getOrder(res.data.orderId)
-                await sleep(1000);
-                const _price = parseFloat(orderRes.data.dealFunds) / parseFloat(orderRes.data.dealSize)
-                const _fee = parseFloat(orderRes.data.fee)
+                while (res.data.orderId != idFillorder) {
+                    try {
+                        await sleep(1500)
+                        res_fill = await getFillsId(bot_struct.MARKET, 'sell', res.data.orderId)
+                        if (res_fill.data.items != undefined)
+                            if (res_fill.data.items.length > 0)
+                                idFillorder = res_fill.data.items[0].orderId
+                    } catch (error) { log('await') }
+                }
 
-                for (var i = 0; i < orders.length; i++) {
-                    var order = orders[i]
-                    for (var j = 0; j < toSold.length; j++) {
-                        if (order.id == toSold[j].id) {
-                            toSold[j].profit = (parseFloat(toSold[j].amount) * _price)
-                                - (parseFloat(toSold[j].amount) * parseFloat(toSold[j].buy_price))
-                            order.fee_sell = parseFloat(_fee / toSold.length)
-                            toSold[j].profit -= order.fee_buy + order.fee_sell
-                            toSold[j].status = 'sold'
-                            toSold[j].sold_price = _price
-                            toSold[j].date_sell = Date.now()
-                            orders[i] = toSold[j]
+                if (res_fill.code == "200000") {
+
+                    const _price = parseFloat(res_fill.data.items[0].price)
+                    const _fee = parseFloat(res_fill.data.items[0].fee)
+
+                    for (var i = 0; i < orders.length; i++) {
+                        var order = orders[i]
+                        for (var j = 0; j < toSold.length; j++) {
+                            if (order.id == toSold[j].id) {
+                                toSold[j].profit = (parseFloat(toSold[j].amount) * _price)
+                                    - (parseFloat(toSold[j].amount) * parseFloat(toSold[j].buy_price))
+                                order.fee_sell = parseFloat(_fee / toSold.length)
+                                toSold[j].profit -= order.fee_buy + order.fee_sell
+                                toSold[j].status = 'sold'
+                                toSold[j].sold_price = _price
+                                toSold[j].date_sell = Date.now()
+                                orders[i] = toSold[j]
+                            }
                         }
                     }
+                    store.put('start_price', _price)
+                    store.put(`${bot_struct.MARKET1}_balance`, await getBalance(bot_struct.MARKET1));
+                    store.put(`${bot_struct.MARKET2}_balance`, await getBalance(bot_struct.MARKET2));
+
+                    log('===========================================================')
+                    log(`Sold ${totalAmount} ${bot_struct.MARKET1} for ${parseFloat(totalAmount * _price).toFixed(2)} ${bot_struct.MARKET2}, Price: ${_price}\n`)
+                    log('===========================================================')
+
+                    await _calculateProfits()
+                    var i = orders.length
+                    while (i--)
+                        if (orders[i].status === 'sold') {
+                            orders_sold.push(orders[i])
+                            if (orders_sold.length > 200) orders_sold.shift();
+                            orders.splice(i, 1)
+                        }
                 }
-                store.put('start_price', _price)
-                store.put(`${bot_struct.MARKET1}_balance`, await getBalance(bot_struct.MARKET1));
-                store.put(`${bot_struct.MARKET2}_balance`, await getBalance(bot_struct.MARKET2));
-
-                log('===========================================================')
-                log(`Sold ${totalAmount} ${bot_struct.MARKET1} for ${parseFloat(totalAmount * _price).toFixed(2)} ${bot_struct.MARKET2}, Price: ${_price}\n`)
-                log('===========================================================')
-
-                await _calculateProfits()
-                var i = orders.length
-                while (i--)
-                    if (orders[i].status === 'sold') {
-                        orders_sold.push(orders[i])
-                        if (orders_sold.length > 200) orders_sold.shift();
-                        orders.splice(i, 1)
-                    }
-
             } else store.put('start_price', price)
         } else store.put('start_price', price)
     } else store.put('start_price', price)
