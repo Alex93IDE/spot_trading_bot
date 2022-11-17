@@ -74,10 +74,10 @@ async function getFillsId(symbol, side, orderId) {
     return res
 }
 
-async function getFillsAll(symbol, side) {
+async function getFillsAll(symbol) {
+    console.log(symbol);
     var res = await API.rest.Trade.Fills.getFillsList('TRADE', {
         symbol: symbol,
-        side: side
     })
     return res
 }

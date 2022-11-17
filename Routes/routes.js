@@ -2,7 +2,7 @@ const { Router } = require('express');
 const ruta = Router();
 
 const { home, process_bot, percent, commandTerminalDeleteData, funds } = require('./Controllers/app');
-const { placeOrder, getOrder } = require('./Controllers/kucoin');
+const { placeOrder, getOrder, getFillsAll } = require('./Controllers/kucoin');
 
 ruta.get('/', home)
 
@@ -14,6 +14,7 @@ ruta.post('/bot/order/create', placeOrder)
 
 //Kucoin
 ruta.get('/order/:id', getOrder)
+ruta.get('/order/fillAll/:symbol', getFillsAll)
 
 //Reset
 ruta.get('/restart/data', commandTerminalDeleteData)
