@@ -5,6 +5,8 @@ const { bot_struct, getBalance, getPriceMarket, _buy, getFillsId, _sell, getBase
 const Storage = require('node-storage')
 const cors = require('cors')
 const { v4: uuidv4 } = require('uuid')
+const { NotifyTelegram } = require('./services/telegram')
+const moment = require('moment')
 
 const server = express();
 const port = 8080;
@@ -50,6 +52,44 @@ async function _calculateProfits() {
             parseFloat(prev) + parseFloat(next)) : 0
 
     store.put('profits', totalSoldProfits + parseFloat(store.get('profits')))
+}
+
+function canNotifyTelegram(from) {
+    return process.env.NOTIFY_TELEGRAM_ON.includes(from)
+}
+
+function elapsedTime() {
+    let storeGeneral = new Storage('./data/general.json');
+    let timeTotal = storeGeneral.get('time');
+
+    let days = Math.floor(timeTotal / 86400);
+    let hours = Math.floor((timeTotal % 86400) / 3600);
+    hours = (hours < 10) ? '0' + hours : hours
+    let minutes = Math.floor(((timeTotal % 86400) % 3600) / 60)
+    minutes = (minutes < 10) ? '0' + minutes : minutes;
+    let seconds = ((timeTotal % 86400) % 3600) % 60;
+    seconds = (seconds < 10) ? '0' + seconds : seconds;
+
+    return days + 'd ' + hours + ':' + minutes + ':' + seconds;
+}
+
+function _notifyTelegram(price, date, from) {
+    moment.locale('es')
+    if (process.env.NOTIFY_TELEGRAM
+        && canNotifyTelegram(from))
+        NotifyTelegram({
+            runningTime: elapsedTime(),
+            market: bot_struct.MARKET,
+            market1: bot_struct.MARKET1,
+            market2: bot_struct.MARKET2,
+            price: price,
+            balance1: store.get(`${bot_struct.MARKET1}_balance`),
+            balance2: store.get(`${bot_struct.MARKET2}_balance`),
+            gridProfits: parseFloat(store.get('profits')).toFixed(4),
+            current: (price * store.get(`${bot_struct.MARKET1}_balance`)) + store.get(`${bot_struct.MARKET2}_balance`),
+            start: moment(date).format('DD/MM/YYYY HH:mm'),
+            from
+        })
 }
 
 async function _buy_kucoin(price) {
@@ -121,6 +161,7 @@ async function _buy_kucoin(price) {
                 log('================================================================')
 
                 await _calculateProfits()
+                _notifyTelegram(price, order.date_buy, 'buy')
             }
         } else _newPriceReset(2, bot_struct.base_quote, price)
     } else _newPriceReset(2, bot_struct.base_quote, price)
@@ -210,6 +251,9 @@ async function _sell_kucoin(price) {
                             if (orders_sold.length > 200) orders_sold.shift();
                             orders.splice(i, 1)
                         }
+
+                    _notifyTelegram(price, Date.now(), 'sell')
+                    
                 }
             } else store.put('start_price', price)
         } else store.put('start_price', price)
