@@ -79,7 +79,7 @@ function _notifyTelegram(price, date, from) {
         && canNotifyTelegram(from))
         NotifyTelegram({
             runningTime: elapsedTime(),
-            market: bot_struct.MARKET,
+            market: bot_struct.MARKET1 + bot_struct.MARKET2,
             market1: bot_struct.MARKET1,
             market2: bot_struct.MARKET2,
             price: price,
