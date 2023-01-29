@@ -86,7 +86,7 @@ function _notifyTelegram(price, date, from) {
             balance1: store.get(`${bot_struct.MARKET1}_balance`),
             balance2: store.get(`${bot_struct.MARKET2}_balance`),
             gridProfits: parseFloat(store.get('profits')).toFixed(4),
-            current: (price * store.get(`${bot_struct.MARKET1}_balance`)) + store.get(`${bot_struct.MARKET2}_balance`),
+            current: parseFloat((price * store.get(`${bot_struct.MARKET1}_balance`)) + store.get(`${bot_struct.MARKET2}_balance`)).toFixed(2),
             start: moment(date).format('DD/MM/YYYY HH:mm'),
             from
         })

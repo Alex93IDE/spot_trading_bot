@@ -8,13 +8,13 @@ const NotifyTelegram = async (data) => {
     ${b + b + b}
     ${data.from === 'buy' ? '🟢' : data.from === 'sell' ? '🔴' : '🔵'} ${data.start}
     ${b + b + b}
-__Duración:__ ${data.runningTime}\\
-__Mercado:__ ${data.market}\\
-__Precio ${data.market1}:__ ${data.price}\\
-__Saldo ${data.market1}:__ ${data.balance1}\\
-__Saldo ${data.market2}:__ ${parseFloat(data.balance2).toFixed(2)}\\
-__Profits:__ ${parseFloat(data.gridProfits).toFixed(2)} ${data.market2}\\
-__Total:__ ${data.current} ${data.market2}`).replace(/\./g, '\\.')
+*${data.market}*\\
+*Precio ${data.market1}:* ${data.price}\\
+*${data.market1}:* ${data.balance1}\\
+*${data.market2}:* ${parseFloat(data.balance2).toFixed(2)}\\
+*Profits:* ${parseFloat(data.gridProfits).toFixed(2)} ${data.market2}\\
+*Total:* ${data.current} ${data.market2}\\
+${b + b + b} ${data.runningTime} ${b + b + b}`).replace(/\./g, '\\.')
 
     try {
         await axios.get(`https://api.telegram.org/bot${process.env.TELEGRAM_BOT_ID}/sendMessage?chat_id=${process.env.TELEGRAM_CHAT_ID}&parse_mode=MarkdownV2&text=${content}`)
