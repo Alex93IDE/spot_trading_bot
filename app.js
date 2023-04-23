@@ -24,6 +24,13 @@ server.use(express.json());  //entiende los formatos json y los convierte a obje
 server.use(express.urlencoded({ extended: false }));  //entiende los formulario
 server.use(require('./Routes/routes'))
 
+server.use(express.static("dist"));
+
+// Agregar una ruta para la raíz del sitio
+server.get("/", (req, res) => {
+    res.sendFile(__dirname + "/dist/index.html");
+});
+
 const sleep = (timeMs) => new Promise(resolve => setTimeout(resolve, timeMs))
 
 var flag_store = 0
@@ -253,7 +260,7 @@ async function _sell_kucoin(price) {
                         }
 
                     _notifyTelegram(price, Date.now(), 'sell')
-                    
+
                 }
             } else store.put('start_price', price)
         } else store.put('start_price', price)

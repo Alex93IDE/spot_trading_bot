@@ -4,7 +4,7 @@ const ruta = Router();
 const { home, process_bot, percent, commandTerminalDeleteData, funds } = require('./Controllers/app');
 const { placeOrder, getOrder, getFillsAll } = require('./Controllers/kucoin');
 
-ruta.get('/', home)
+ruta.get('/api', home)
 
 //Bot
 ruta.get('/bot', process_bot)
