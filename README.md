@@ -60,5 +60,5 @@ Go to **./sevices**, create a **_config.json_** file, and add:
         NOTIFY_TELEGRAM=1
         NOTIFY_TELEGRAM_ON=sell,buy,withdraw
         TELEGRAM_BOT_ID="token"
-T       ELEGRAM_CHAT_ID="id_chat"
-}
+        TELEGRAM_CHAT_ID="id_chat"
+    }
