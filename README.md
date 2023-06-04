@@ -62,3 +62,14 @@ Go to **./sevices**, create a **_config.json_** file, and add:
         TELEGRAM_BOT_ID="token"
         TELEGRAM_CHAT_ID="id_chat"
     }
+
+# Frontend
+
+
+![Texto alternativo](/docu/1.png)
+
+![Texto alternativo](/docu/2.png)
+
+![Texto alternativo](/docu/3.png)
+
+***The current version of the frontend provides a more convenient way to visualize data. In future versions, it will offer additional functionality to configure the bot directly from the frontend.***
