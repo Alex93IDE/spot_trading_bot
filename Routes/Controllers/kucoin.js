@@ -1,4 +1,4 @@
-const { _buy, _sell, bot_struct, getBaseSize, getOrder, getFillsAll } = require('../../utils/bot')
+const { _buy, _sell, bot_struct, getBaseSize, getOrder, getFillsAll, getBalance } = require('../../utils/bot')
 const { v4: uuidv4 } = require('uuid')
 
 exports.placeOrder = async (req, res) => {
@@ -40,5 +40,11 @@ exports.getOrder = async (req, res) => {
 exports.getFillsAll = async (req, res) => {
     let data = req.params.symbol;
     const result = await getFillsAll(data);
+    res.json(result)
+}
+
+exports.getOneBalance = async (req, res) => { 
+    const data = req.params.coin;
+    const result = await getBalance(data);
     res.json(result)
 }
